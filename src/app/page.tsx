@@ -1,103 +1,138 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { AlertCircle, Calendar, Building2 } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50">
+      {/* WIP Banner */}
+      <div className="bg-amber-400 text-amber-950 flex items-center justify-center p-3 sticky top-0 z-10">
+        <AlertCircle className="h-5 w-5 mr-2" />
+        <span className="font-medium">
+          This application is currently under development
+        </span>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col items-center">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
+            Appointment Scheduler
+          </h1>
+          <p className="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto">
+            Effortlessly manage your schedule and business resources with our
+            intuitive platform
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+          <Card className="overflow-hidden border-none shadow-lg transition-all hover:shadow-xl">
+            <div className="h-2 bg-blue-500"></div>
+            <CardHeader className="pb-2">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-6 w-6 text-blue-500 mr-2" />
+                <CardTitle>For Clients</CardTitle>
+              </div>
+              <CardDescription className="text-base">
+                Manage your appointments with ease
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
+                  Book appointments in real-time
+                </li>
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
+                  View your appointment history
+                </li>
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-2"></div>
+                  Receive email confirmations
+                </li>
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full bg-blue-500 hover:bg-blue-600" asChild>
+                <Link href="/client">Schedule Now</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="overflow-hidden border-none shadow-lg transition-all hover:shadow-xl">
+            <div className="h-2 bg-indigo-500"></div>
+            <CardHeader className="pb-2">
+              <div className="flex items-center mb-2">
+                <Building2 className="h-6 w-6 text-indigo-500 mr-2" />
+                <CardTitle>For Businesses</CardTitle>
+              </div>
+              <CardDescription className="text-base">
+                Streamline your business operations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-2">
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mr-2"></div>
+                  Manage staff availability
+                </li>
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mr-2"></div>
+                  Configure service offerings
+                </li>
+                <li className="flex items-center text-slate-700">
+                  <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 mr-2"></div>
+                  View appointment analytics
+                </li>
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button
+                className="w-full bg-indigo-500 hover:bg-indigo-600"
+                asChild
+              >
+                <Link href="/business">Manage Business</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Feature Preview */}
+        <div className="mt-20 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">
+            Coming Soon
+          </h2>
+          <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
+            We are working hard to bring you more features, including mobile
+            apps, calendar integrations, and advanced analytics.
+          </p>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-slate-100 text-slate-800">
+            <span className="relative flex h-3 w-3 mr-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            Development in Progress
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-24 text-center text-slate-500 text-sm">
+          <p>
+            © {new Date().getFullYear()} Appointment Scheduler. All rights
+            reserved.
+          </p>
+        </footer>
+      </div>
+    </main>
   );
 }
