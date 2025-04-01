@@ -1,65 +1,91 @@
 @import "tailwindcss";
 
+@theme {
+  /* Shocking Pink colors */
+  --color-pink-shocking: #df0cb5;
+  --color-pink-shocking-light: #e854cb;
+  --color-pink-shocking-dark: #b20990;
+
+  /* Accent colors */
+  --color-cinnamon: #e05915;
+  --color-lemon: #dfd60c;
+
+  /* Slate (neutral) colors */
+  --color-slate-50: #f2f2f2;
+  --color-slate-200: #b5b3b2;
+  --color-slate-400: #858180;
+  --color-slate-600: #54504d;
+  --color-slate-800: #231d1a;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 20 9% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 20 9% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 20 9% 13%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary color is now Shocking Pink */
+    --primary: 311 90% 46%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary color is now Hot Cinnamon */
+    --secondary: 24 83% 48%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted uses Slate palette */
+    --muted: 20 2% 88%;
+    --muted-foreground: 20 3% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent uses Bitter Lemon */
+    --accent: 58 75% 46%;
+    --accent-foreground: 20 9% 13%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 20 3% 80%;
+    --input: 20 3% 80%;
+    --ring: 311 90% 46%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 20 9% 13%;
+    --foreground: 0 0% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 20 9% 13%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 20 9% 13%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Primary color in dark mode */
+    --primary: 311 71% 75%;
+    --primary-foreground: 20 9% 13%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary color still Hot Cinnamon */
+    --secondary: 24 83% 48%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Muted uses Slate palette */
+    --muted: 20 5% 35%;
+    --muted-foreground: 20 3% 80%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent uses Bitter Lemon */
+    --accent: 58 75% 46%;
+    --accent-foreground: 20 9% 13%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 20 5% 35%;
+    --input: 20 5% 35%;
+    --ring: 311 71% 75%;
   }
 }
