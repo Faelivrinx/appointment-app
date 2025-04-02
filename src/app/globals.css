@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  /* Custom font families */
+  --font-heading: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
   /* Shocking Pink colors */
   --color-pink-shocking: #df0cb5;
   --color-pink-shocking-light: #e854cb;
@@ -87,5 +91,18 @@
     --border: 20 5% 35%;
     --input: 20 5% 35%;
     --ring: 311 71% 75%;
+  }
+  /* Apply fonts to elements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  body {
+    font-family: var(--font-body);
   }
 }
