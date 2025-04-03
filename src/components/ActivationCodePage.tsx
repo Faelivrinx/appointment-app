@@ -169,7 +169,7 @@ export default function ActivationCodePage() {
 
           <div className="mt-10 text-center">
             <Button
-              type="link"
+              type="button"
               onClick={handleResendCode}
               disabled={isResending}
               className="text-neutral hover:text-shocking-pink transition-colors flex items-center mx-auto font-medium disabled:opacity-50"
