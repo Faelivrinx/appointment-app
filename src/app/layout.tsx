@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Comfortaa, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 // Define fonts
 const comfortaa = Comfortaa({
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${comfortaa.variable} ${spaceGrotesk.variable}`}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

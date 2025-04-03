@@ -92,6 +92,7 @@
     --input: 20 5% 35%;
     --ring: 311 71% 75%;
   }
+
   /* Apply fonts to elements */
   h1,
   h2,
@@ -104,5 +105,21 @@
 
   body {
     font-family: var(--font-body);
+  }
+
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .animate-caret-blink {
+    animation: caret-blink 1.2s ease-in-out infinite;
   }
 }
