@@ -1,7 +1,10 @@
-"use client";
+import AuthLayout from "@/components/auth/AuthLayout";
+import ActivationForm from "@/components/auth/ActivationForm";
 
-import ActivationCodePage from "@/components/ActivationCodePage";
-
-export default function ActivationCodeRoute() {
-  return ActivationCodePage();
+export default function ActivationCodePage() {
+  return (
+    <AuthLayout>
+      <ActivationForm />
+    </AuthLayout>
+  );
 }

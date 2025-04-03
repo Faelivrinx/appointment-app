@@ -1,112 +1,85 @@
 @import "tailwindcss";
 
+/* Define theme colors that will generate utility classes */
 @theme {
-  /* Custom font families */
-  --font-heading: "Comfortaa", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  /* Your custom color palette */
+  --color-primary-100: #d4eaf7;
+  --color-primary-200: #b6ccd8;
+  --color-primary-300: #3b3c3d;
+  --color-accent-100: #71c4ef;
+  --color-accent-200: #00668c;
+  --color-text-100: #1d1c1c;
+  --color-text-200: #313d44;
+  --color-bg-100: #fffefb;
+  --color-bg-200: #f5f4f1;
+  --color-bg-300: #cccbc8;
+}
 
-  /* Shocking Pink colors */
-  --color-pink-shocking: #df0cb5;
-  --color-pink-shocking-light: #e854cb;
-  --color-pink-shocking-dark: #b20990;
+/* Regular CSS variables for design system */
+:root {
+  /* Design system variables that don't need utility classes */
+  --background: var(--color-bg-100);
+  --foreground: var(--color-text-200);
 
-  /* Accent colors */
-  --color-cinnamon: #e05915;
-  --color-lemon: #dfd60c;
+  --card: var(--color-bg-200);
+  --card-foreground: var(--color-text-200);
 
-  /* Slate (neutral) colors */
-  --color-slate-50: #f2f2f2;
-  --color-slate-200: #b5b3b2;
-  --color-slate-400: #858180;
-  --color-slate-600: #54504d;
-  --color-slate-800: #231d1a;
+  --popover: var(--color-bg-100);
+  --popover-foreground: var(--color-text-200);
+
+  --primary: var(--color-accent-200);
+  --primary-foreground: var(--color-bg-100);
+
+  --secondary: var(--color-accent-100);
+  --secondary-foreground: var(--color-bg-100);
+
+  --muted: var(--color-bg-300);
+  --muted-foreground: var(--color-text-200);
+
+  --accent: var(--color-primary-100);
+  --accent-foreground: var(--color-text-100);
+
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: var(--color-bg-100);
+
+  --border: var(--color-bg-300);
+  --input: var(--color-bg-300);
+  --ring: var(--color-accent-200);
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: var(--color-text-100);
+  --foreground: var(--color-bg-100);
+
+  --card: var(--color-text-100);
+  --card-foreground: var(--color-bg-100);
+
+  --popover: var(--color-text-100);
+  --popover-foreground: var(--color-bg-100);
+
+  --primary: var(--color-accent-200);
+  --primary-foreground: var(--color-bg-100);
+
+  --secondary: var(--color-accent-100);
+  --secondary-foreground: var(--color-bg-100);
+
+  --muted: #2c2c2c;
+  --muted-foreground: var(--color-bg-100);
+
+  --accent: var(--color-primary-100);
+  --accent-foreground: var(--color-text-100);
+
+  --destructive: hsl(0 63% 31%);
+  --destructive-foreground: var(--color-bg-100);
+
+  --border: #2c2c2c;
+  --input: #2c2c2c;
+  --ring: var(--color-accent-200);
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 20 9% 13%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 20 9% 13%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 9% 13%;
-
-    /* Primary color is now Shocking Pink */
-    --primary: 311 90% 46%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Secondary color is now Hot Cinnamon */
-    --secondary: 24 83% 48%;
-    --secondary-foreground: 0 0% 100%;
-
-    /* Muted uses Slate palette */
-    --muted: 20 2% 88%;
-    --muted-foreground: 20 3% 45%;
-
-    /* Accent uses Bitter Lemon */
-    --accent: 58 75% 46%;
-    --accent-foreground: 20 9% 13%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 20 3% 80%;
-    --input: 20 3% 80%;
-    --ring: 311 90% 46%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 20 9% 13%;
-    --foreground: 0 0% 95%;
-
-    --card: 20 9% 13%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 20 9% 13%;
-    --popover-foreground: 0 0% 95%;
-
-    /* Primary color in dark mode */
-    --primary: 311 71% 75%;
-    --primary-foreground: 20 9% 13%;
-
-    /* Secondary color still Hot Cinnamon */
-    --secondary: 24 83% 48%;
-    --secondary-foreground: 0 0% 95%;
-
-    /* Muted uses Slate palette */
-    --muted: 20 5% 35%;
-    --muted-foreground: 20 3% 80%;
-
-    /* Accent uses Bitter Lemon */
-    --accent: 58 75% 46%;
-    --accent-foreground: 20 9% 13%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 20 5% 35%;
-    --input: 20 5% 35%;
-    --ring: 311 71% 75%;
-  }
-
-  /* Apply fonts to elements */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-  }
-
-  body {
-    font-family: var(--font-body);
-  }
-
   @keyframes caret-blink {
     0%,
     70%,

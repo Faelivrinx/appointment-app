@@ -1,5 +1,10 @@
-import LoginPage from "@/components/LoginPage";
+import AuthLayout from "@/components/auth/AuthLayout";
+import LoginForm from "@/components/auth/LoginForm";
 
-export default function LoginRoute() {
-  return <LoginPage />;
+export default function LoginPage() {
+  return (
+    <AuthLayout>
+      <LoginForm />
+    </AuthLayout>
+  );
 }
