@@ -14,11 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { loginSchema } from "@/lib/validators";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 // Type for our form values
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
+  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Initialize the form
@@ -36,14 +39,16 @@ export default function LoginForm() {
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await login(data.email, data.password);
 
       console.log("Submitting login data:", data);
-
+      toast.success("Logged in successfully!");
       // In a real application, you would handle the API response here
       // and redirect on success
     } catch (error) {
       console.error("Login error:", error);
+
+      toast.error("Invalid email or password. Please try again.");
 
       // Set form error on failure
       form.setError("root", {

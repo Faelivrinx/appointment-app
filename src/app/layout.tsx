@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Comfortaa, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/context/auth-context";
 
 // Define fonts
 const comfortaa = Comfortaa({
@@ -31,8 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${comfortaa.variable} ${spaceGrotesk.variable}`}>
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

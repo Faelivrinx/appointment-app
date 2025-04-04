@@ -14,11 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { signupSchema } from "@/lib/validators";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 // Type for our form values
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
+  const { signup } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Initialize the form
@@ -39,14 +42,25 @@ export default function SignupForm() {
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await signup({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        password: data.password,
+      });
 
-      console.log("Submitting signup data:", data);
+      toast.success(
+        "Account created successfully! Please verify your account.",
+      );
 
       // In a real application, you would handle the API response here
       // and redirect on success
     } catch (error) {
       console.error("Signup error:", error);
+      toast.error(
+        "There was an error creating your account. Please try again.",
+      );
 
       // Set form error on failure
       form.setError("root", {
