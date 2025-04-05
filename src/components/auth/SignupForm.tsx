@@ -14,14 +14,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { signupSchema } from "@/lib/validators";
-import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { registerClient } from "@/services/api";
+import { useRouter } from "next/navigation";
 
 // Type for our form values
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
-  const { signup } = useAuth();
+  const router = useRouter();
+
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Initialize the form
@@ -42,20 +44,48 @@ export default function SignupForm() {
 
     try {
       // Simulate API call
-      await signup({
+      const response = await registerClient({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: data.phone,
-        password: data.password,
+        phoneNumber: data.phone,
       });
 
-      toast.success(
-        "Account created successfully! Please verify your account.",
-      );
+      if (response.status === 201) {
+        // Success - Store email temporarily for the activation code page
+        localStorage.setItem("registrationEmail", data.email);
 
-      // In a real application, you would handle the API response here
-      // and redirect on success
+        toast.success("Account created! Please verify your account.");
+
+        // Store registration data for Keycloak registration (would normally happen on the server)
+        localStorage.setItem(
+          "pendingRegistration",
+          JSON.stringify({
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            password: data.password,
+          }),
+        );
+
+        // Redirect to activation code page
+        router.push("/activation-code");
+      } else {
+        // Handle specific error cases
+        let errorMessage =
+          response.error || "Registration failed. Please try again.";
+
+        if (response.status === 400) {
+          errorMessage =
+            "Invalid registration data. Please check your information.";
+        } else if (response.status === 409) {
+          errorMessage =
+            "This email is already registered. Please log in instead.";
+        }
+
+        toast.error(errorMessage);
+        console.error("Registration error:", response);
+      }
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(
