@@ -8,10 +8,11 @@ import { LogOut, Settings, Calendar, Users, User, Shield } from "lucide-react";
 export default function DashboardPage() {
   const { user, logout } = useAuth();
 
+  console.log("User data:", user);
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-neutral-lightest via-white to-shocking-pink-light/10">
-        {/* Header with welcome message and logout */}
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <h1 className="text-xl font-semibold text-text-100">Dashboard</h1>

@@ -53,7 +53,6 @@ export default function LoginForm() {
         toast.success("Login successful!");
 
         // Redirect to the intended destination
-        console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } else {
         form.setError("root", {
