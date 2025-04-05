@@ -14,44 +14,64 @@ export default function ProtectedRoute({
   children,
   requiredRoles = [],
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasRole, login } = useAuth();
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // If not loading and not authenticated, redirect to login
     if (!isLoading && !isAuthenticated) {
-      login();
+      // Store the current path for redirect after login
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+        sessionStorage.setItem("auth_redirect_path", currentPath);
+      }
+
+      // Redirect to login page
+      router.push("/login");
       return;
     }
 
+    // If authenticated but missing required role, redirect to unauthorized
     if (!isLoading && isAuthenticated && requiredRoles.length > 0) {
       const hasRequiredRole = requiredRoles.some((role) => hasRole(role));
       if (!hasRequiredRole) {
         router.push("/unauthorized");
       }
     }
-  }, [isAuthenticated, isLoading, router, hasRole, requiredRoles, login]);
+  }, [isAuthenticated, isLoading, router, hasRole, requiredRoles]);
 
-  if (isLoading || (!isAuthenticated && requiredRoles.length > 0)) {
+  // Show loading spinner while checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show loading while redirecting to login
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+        <span className="ml-3">Redirecting to login...</span>
+      </div>
+    );
+  }
+
+  // Show loading while checking roles
+  if (
+    requiredRoles.length > 0 &&
+    !requiredRoles.some((role) => hasRole(role))
+  ) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+        <span className="ml-3">Checking permissions...</span>
       </div>
     );
   }
 
   // If authenticated and role check passes (or no roles required), render the protected content
-  if (
-    isAuthenticated &&
-    (requiredRoles.length === 0 || requiredRoles.some((role) => hasRole(role)))
-  ) {
-    return <>{children}</>;
-  }
-
-  // Don't render anything while redirecting
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <LoadingSpinner />
-      <span className="ml-3">Redirecting to login...</span>
-    </div>
-  );
+  return <>{children}</>;
 }

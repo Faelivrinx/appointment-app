@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import * as keycloakService from "@/services/keycloak";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import * as authService from "@/services/auth";
 
 // Define the User type
 export type User = {
@@ -19,7 +20,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   accessToken: string | null;
-  login: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshUserToken: () => Promise<boolean>;
   hasRole: (role: string) => boolean;
@@ -28,12 +29,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Storage keys
-const STORAGE_KEY = {
-  ACCESS_TOKEN: "appointment_app_access_token",
-  REFRESH_TOKEN: "appointment_app_refresh_token",
-  TOKEN_EXPIRY: "appointment_app_token_expiry",
-  USER: "appointment_app_user",
-};
+const STORAGE_KEY = authService.STORAGE_KEY;
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -46,6 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [tokenExpiry, setTokenExpiry] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Check if the token is expired or will expire soon (within 1 minute)
   const isTokenExpired = (): boolean => {
@@ -58,32 +55,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!refreshToken) return false;
 
     try {
-      const tokenResponse = await keycloakService.refreshToken(refreshToken);
+      const success = await authService.refreshToken();
 
-      // Update tokens in state and storage
-      setAccessToken(tokenResponse.access_token);
-      setRefreshToken(tokenResponse.refresh_token);
+      if (success) {
+        // Update state with refreshed tokens
+        const newAccessToken = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+        const newRefreshToken = localStorage.getItem(STORAGE_KEY.REFRESH_TOKEN);
+        const newExpiry = localStorage.getItem(STORAGE_KEY.TOKEN_EXPIRY);
 
-      const newExpiry = Date.now() + tokenResponse.expires_in * 1000;
-      setTokenExpiry(newExpiry);
-
-      // Update storage
-      if (typeof window !== "undefined") {
-        localStorage.setItem(
-          STORAGE_KEY.ACCESS_TOKEN,
-          tokenResponse.access_token,
-        );
-        localStorage.setItem(
-          STORAGE_KEY.REFRESH_TOKEN,
-          tokenResponse.refresh_token,
-        );
-        localStorage.setItem(STORAGE_KEY.TOKEN_EXPIRY, newExpiry.toString());
+        if (newAccessToken && newRefreshToken && newExpiry) {
+          setAccessToken(newAccessToken);
+          setRefreshToken(newRefreshToken);
+          setTokenExpiry(parseInt(newExpiry, 10));
+          return true;
+        }
       }
 
-      return true;
+      // If refresh failed, clear auth data
+      clearAuthData();
+      return false;
     } catch (error) {
       console.error("Failed to refresh token:", error);
-      // If refresh fails, prepare for login
       clearAuthData();
       return false;
     }
@@ -95,13 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setAccessToken(null);
     setRefreshToken(null);
     setTokenExpiry(null);
-
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(STORAGE_KEY.ACCESS_TOKEN);
-      localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN);
-      localStorage.removeItem(STORAGE_KEY.TOKEN_EXPIRY);
-      localStorage.removeItem(STORAGE_KEY.USER);
-    }
+    authService.logout();
   };
 
   // Initialize auth state
@@ -133,15 +119,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
               if (
                 !refreshed &&
                 pathname !== "/login" &&
+                pathname !== "/signup" &&
+                pathname !== "/activation-code" &&
                 !pathname.startsWith("/auth/")
               ) {
-                // Token refresh failed, redirect to login
-                login();
+                // Token refresh failed and not on authentication pages
+                toast.error("Your session has expired. Please log in again.");
+                clearAuthData();
+                router.push("/login");
               }
             }
-          } else if (pathname !== "/login" && !pathname.startsWith("/auth/")) {
-            // No tokens found, show loading while redirecting
-            setIsLoading(true);
           }
         }
       } catch (error) {
@@ -153,7 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initAuth();
-  }, [pathname]);
+  }, [pathname, router]);
 
   // Check if user has a specific role
   const hasRole = (role: string): boolean => {
@@ -161,32 +148,44 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return user.roles.includes(role);
   };
 
-  // Login function - initiates OAuth flow
-  const login = () => {
-    if (typeof window !== "undefined") {
-      // Store the current path to redirect back after login
-      if (pathname !== "/login" && !pathname.startsWith("/auth/")) {
-        sessionStorage.setItem("auth_redirect_path", pathname);
+  // Login function - uses direct login with email and password
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const userData = await authService.login(email, password);
+
+      if (userData) {
+        setUser(userData);
+
+        // Set tokens in state
+        const newAccessToken = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+        const newRefreshToken = localStorage.getItem(STORAGE_KEY.REFRESH_TOKEN);
+        const newExpiry = localStorage.getItem(STORAGE_KEY.TOKEN_EXPIRY);
+
+        if (newAccessToken && newRefreshToken && newExpiry) {
+          setAccessToken(newAccessToken);
+          setRefreshToken(newRefreshToken);
+          setTokenExpiry(parseInt(newExpiry, 10));
+        }
+
+        return true;
       }
 
-      // Start the auth flow
-      keycloakService.initiateLogin();
+      return false;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
   };
 
   // Logout function
   const logout = () => {
     clearAuthData();
-
-    // Call Keycloak logout
-    if (typeof window !== "undefined") {
-      keycloakService.logout(window.location.origin + "/login");
-    }
+    router.push("/login");
   };
 
   // Set up token refresh interval
   useEffect(() => {
-    if (!isAuthenticated || !refreshToken) return;
+    if (!accessToken || !refreshToken) return;
 
     const tokenRefreshInterval = setInterval(
       async () => {
@@ -194,6 +193,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const refreshed = await refreshUserToken();
           if (!refreshed) {
             clearInterval(tokenRefreshInterval);
+            toast.error("Your session has expired. Please log in again.");
+            clearAuthData();
+            router.push("/login");
           }
         }
       },
@@ -203,7 +205,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       clearInterval(tokenRefreshInterval);
     };
-  }, [isTokenExpired, refreshToken]);
+  }, [accessToken, refreshToken, router]);
 
   // Auth context value
   const value = {

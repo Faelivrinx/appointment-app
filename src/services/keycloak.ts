@@ -1,9 +1,9 @@
-// Keycloak Service for managing authentication with Keycloak SSO using Authorization Code Flow with PKCE
+// Keycloak Service for managing authentication with Keycloak SSO
 
 // Define Keycloak configuration
 export const KEYCLOAK_CONFIG = {
   url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || "http://localhost:8080",
-  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "appointment-app",
+  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "appointment-realm",
   clientId:
     process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || "appointment-frontend",
 };
@@ -29,6 +29,47 @@ export interface UserProfile {
   enabled: boolean;
   emailVerified: boolean;
   attributes?: Record<string, any>;
+}
+
+/**
+ * Direct login with username and password (Resource Owner Password Credentials grant)
+ * Note: This requires the "Direct Access Grants" to be enabled on the Keycloak client
+ */
+export async function directLogin(
+  username: string,
+  password: string,
+): Promise<TokenResponse> {
+  const tokenUrl = `${KEYCLOAK_CONFIG.url}/realms/${KEYCLOAK_CONFIG.realm}/protocol/openid-connect/token`;
+
+  const params = new URLSearchParams();
+  params.append("client_id", KEYCLOAK_CONFIG.clientId);
+  params.append("grant_type", "password");
+  params.append("username", username);
+  params.append("password", password);
+  params.append("scope", "openid profile email");
+
+  try {
+    const response = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error_description ||
+          "Authentication failed. Please check your credentials.",
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Direct login error:", error);
+    throw error;
+  }
 }
 
 /**
@@ -66,7 +107,7 @@ function base64URLEncode(buffer: Uint8Array): string {
  * Initiates the authorization code flow with PKCE
  * Redirects the user to Keycloak login page
  */
-export function initiateLogin(): void {
+export function initiateLogin(additionalParams = {}): void {
   // Generate PKCE code verifier and challenge
   const codeVerifier = generateCodeVerifier();
 
@@ -96,6 +137,19 @@ export function initiateLogin(): void {
     authUrl.searchParams.append("scope", "openid profile email");
     authUrl.searchParams.append("code_challenge", codeChallenge);
     authUrl.searchParams.append("code_challenge_method", "S256");
+
+    // Add login hint if available
+    const loginHint = sessionStorage.getItem("login_email");
+    if (loginHint) {
+      authUrl.searchParams.append("login_hint", loginHint);
+      // Clear it after use
+      sessionStorage.removeItem("login_email");
+    }
+
+    // Add any additional parameters
+    for (const [key, value] of Object.entries(additionalParams)) {
+      authUrl.searchParams.append(key, String(value));
+    }
 
     // Add a state parameter to prevent CSRF
     const state = generateCodeVerifier();
