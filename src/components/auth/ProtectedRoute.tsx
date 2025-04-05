@@ -7,21 +7,31 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiredRoles?: string[];
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+export default function ProtectedRoute({
+  children,
+  requiredRoles = [],
+}: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, hasRole, login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // If authentication check is complete and user is not authenticated, redirect to login
     if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+      login();
+      return;
     }
-  }, [isAuthenticated, isLoading, router]);
 
-  // Show loading spinner while checking authentication status
-  if (isLoading) {
+    if (!isLoading && isAuthenticated && requiredRoles.length > 0) {
+      const hasRequiredRole = requiredRoles.some((role) => hasRole(role));
+      if (!hasRequiredRole) {
+        router.push("/unauthorized");
+      }
+    }
+  }, [isAuthenticated, isLoading, router, hasRole, requiredRoles, login]);
+
+  if (isLoading || (!isAuthenticated && requiredRoles.length > 0)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
@@ -29,6 +39,19 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // If authenticated, render the protected content
-  return isAuthenticated ? <>{children}</> : null;
+  // If authenticated and role check passes (or no roles required), render the protected content
+  if (
+    isAuthenticated &&
+    (requiredRoles.length === 0 || requiredRoles.some((role) => hasRole(role)))
+  ) {
+    return <>{children}</>;
+  }
+
+  // Don't render anything while redirecting
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <LoadingSpinner />
+      <span className="ml-3">Redirecting to login...</span>
+    </div>
+  );
 }
