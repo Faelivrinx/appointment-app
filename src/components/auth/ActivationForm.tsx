@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw } from "lucide-react";
@@ -20,13 +20,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { activationCodeSchema } from "@/lib/validators";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { activateClient } from "@/services/api";
 
 // Type for our form values
 type ActivationFormValues = z.infer<typeof activationCodeSchema>;
 
 export default function ActivationForm() {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isResending, setIsResending] = React.useState(false);
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("registrationEmail");
+    const pendingRegistration = localStorage.getItem("pendingRegistration");
+
+    if (storedEmail) {
+      setEmail(storedEmail);
+    }
+
+    if (pendingRegistration) {
+      try {
+        const regData = JSON.parse(pendingRegistration);
+        if (regData.password) {
+          setPassword(regData.password);
+        }
+      } catch (error) {
+        console.error("Error parsing registration data:", error);
+      }
+    }
+
+    // If we don't have email or password, redirect to signup
+    if (!storedEmail || !pendingRegistration) {
+      toast.error("Registration information not found. Please sign up again.");
+      router.push("/signup");
+    }
+  }, [router]);
 
   // Initialize the form
   const form = useForm<ActivationFormValues>({
@@ -38,41 +70,70 @@ export default function ActivationForm() {
 
   // Form submission handler
   const onSubmit = async (data: ActivationFormValues) => {
+    if (!email || !password) {
+      toast.error("Missing registration information. Please sign up again.");
+      router.push("/signup");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await activateClient({
+        email,
+        verificationCode: data.code,
+        password,
+      });
 
-      console.log("Submitting activation code:", data);
+      if (response.status === 200) {
+        // Success - clear temporary storage and redirect to login
+        localStorage.removeItem("registrationEmail");
+        localStorage.removeItem("pendingRegistration");
 
-      // In a real application, you would handle the API response here
-      // and redirect on success
+        toast.success("Account activated successfully! Please log in.");
+        router.push("/login");
+      } else {
+        // Handle specific error cases
+        if (response.status === 400) {
+          form.setError("code", {
+            type: "manual",
+            message: "Invalid activation code. Please try again.",
+          });
+          toast.error("Invalid activation code. Please try again.");
+        } else {
+          toast.error(response.error || "Activation failed. Please try again.");
+        }
+      }
     } catch (error) {
       console.error("Activation error:", error);
+      toast.error("Something went wrong. Please try again.");
 
-      // Set form error on failure
       form.setError("code", {
         type: "manual",
-        message: "Invalid code. Please try again.",
+        message: "Failed to verify code. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Resend code handler
   const handleResendCode = async () => {
+    if (!email) {
+      toast.error("Email not found. Please sign up again.");
+      router.push("/signup");
+      return;
+    }
+
     setIsResending(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Reset the form
+      toast.success("Verification code has been resent.");
       form.reset();
     } catch (error) {
       console.error("Error resending code:", error);
+      toast.error("Failed to resend code. Please try again.");
     } finally {
       setIsResending(false);
     }

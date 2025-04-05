@@ -43,7 +43,6 @@ export default function SignupForm() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
       const response = await registerClient({
         email: data.email,
         firstName: data.firstName,
@@ -52,12 +51,10 @@ export default function SignupForm() {
       });
 
       if (response.status === 201) {
-        // Success - Store email temporarily for the activation code page
         localStorage.setItem("registrationEmail", data.email);
 
         toast.success("Account created! Please verify your account.");
 
-        // Store registration data for Keycloak registration (would normally happen on the server)
         localStorage.setItem(
           "pendingRegistration",
           JSON.stringify({
@@ -68,10 +65,8 @@ export default function SignupForm() {
           }),
         );
 
-        // Redirect to activation code page
         router.push("/activation-code");
       } else {
-        // Handle specific error cases
         let errorMessage =
           response.error || "Registration failed. Please try again.";
 
