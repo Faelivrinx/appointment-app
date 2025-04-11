@@ -5,20 +5,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import {
-  Settings,
   Calendar,
-  ListChecks,
-  Users,
+  Clock,
   Menu,
   X,
   LogOut,
   User,
+  History,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
-export default function BusinessLayout({
+export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -28,9 +28,9 @@ export default function BusinessLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Check if user has business role
+  // Check if user has client role
   useEffect(() => {
-    if (!isLoading && !hasRole("BUSINESS_OWNER") && !hasRole("ADMIN")) {
+    if (!isLoading && !hasRole("client") && !hasRole("admin")) {
       router.push("/unauthorized");
     }
   }, [isLoading, hasRole, router]);
@@ -38,29 +38,29 @@ export default function BusinessLayout({
   const menuItems = [
     {
       name: "Dashboard",
-      href: "/business",
+      href: "/client",
+      icon: <Home className="h-5 w-5 mr-3" />,
+    },
+    {
+      name: "Book Appointment",
+      href: "/client/book",
       icon: <Calendar className="h-5 w-5 mr-3" />,
     },
     {
-      name: "Services",
-      href: "/business/services",
-      icon: <ListChecks className="h-5 w-5 mr-3" />,
+      name: "Upcoming",
+      href: "/client/appointments",
+      icon: <Clock className="h-5 w-5 mr-3" />,
     },
     {
-      name: "Staff",
-      href: "/business/staff",
-      icon: <Users className="h-5 w-5 mr-3" />,
-    },
-    {
-      name: "Settings",
-      href: "/business/settings",
-      icon: <Settings className="h-5 w-5 mr-3" />,
+      name: "History",
+      href: "/client/history",
+      icon: <History className="h-5 w-5 mr-3" />,
     },
   ];
 
   const isActive = (href: string) => {
-    if (href === "/business") {
-      return pathname === "/business";
+    if (href === "/client") {
+      return pathname === "/client";
     }
     return pathname.startsWith(href);
   };
@@ -94,7 +94,7 @@ export default function BusinessLayout({
               )}
               <span className="sr-only">Toggle menu</span>
             </Button>
-            <div className="font-bold text-text-100">Business Portal</div>
+            <div className="font-bold text-text-100">Client Portal</div>
             <div>
               <Button
                 variant="ghost"
@@ -119,7 +119,7 @@ export default function BusinessLayout({
             <div className="h-full flex flex-col">
               <div className="p-4 border-b hidden lg:block">
                 <h1 className="text-xl font-bold text-text-100">
-                  Business Portal
+                  Client Portal
                 </h1>
               </div>
 
@@ -127,8 +127,8 @@ export default function BusinessLayout({
               <div className="p-4 border-b">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-accent-100 flex items-center justify-center">
-                      <User className="h-5 w-5 text-accent-200" />
+                    <div className="h-10 w-10 rounded-full bg-shocking-pink-light/50 flex items-center justify-center">
+                      <User className="h-5 w-5 text-shocking-pink" />
                     </div>
                   </div>
                   <div className="ml-3">
@@ -150,7 +150,7 @@ export default function BusinessLayout({
                     href={item.href}
                     className={`flex items-center px-2 py-2 text-base rounded-md ${
                       isActive(item.href)
-                        ? "bg-accent-100/20 text-accent-200 font-medium"
+                        ? "bg-shocking-pink-light/20 text-shocking-pink font-medium"
                         : "text-text-200 hover:bg-bg-200"
                     }`}
                     onClick={() => setSidebarOpen(false)}

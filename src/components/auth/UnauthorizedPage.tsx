@@ -1,15 +1,25 @@
-// src/app/unauthorized/page.tsx
 "use client";
 
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft, Home } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 export default function UnauthorizedPage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
+
+  // Determine main redirect based on role
+  const getHomeRoute = () => {
+    if (hasRole("business")) {
+      return "/business";
+    } else if (hasRole("admin")) {
+      return "/admin";
+    } else {
+      return "/dashboard";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-lightest via-white to-shocking-pink-light/10 flex flex-col items-center justify-center p-4">
@@ -45,10 +55,18 @@ export default function UnauthorizedPage() {
           <Button
             variant="outline"
             className="flex items-center gap-2"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            Go Back
+          </Button>
+
+          <Button
+            className="flex items-center gap-2 bg-accent-200 hover:bg-accent-100 text-white"
+            onClick={() => router.push(getHomeRoute())}
+          >
+            <Home className="h-4 w-4" />
+            Go to Dashboard
           </Button>
 
           <Button variant="destructive" onClick={() => logout()}>

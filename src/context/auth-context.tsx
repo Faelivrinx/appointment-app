@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as authService from "@/services/auth";
+import { canAccessRoute, PUBLIC_ROUTES } from "@/config/roles";
 
 // Define the User type
 export type User = {
@@ -24,6 +25,7 @@ type AuthContextType = {
   logout: () => void;
   refreshUserToken: () => Promise<boolean>;
   hasRole: (role: string) => boolean;
+  canAccess: (path: string) => boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,12 +120,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
               const refreshed = await refreshUserToken();
               if (
                 !refreshed &&
-                pathname !== "/login" &&
-                pathname !== "/signup" &&
-                pathname !== "/activation-code" &&
-                !pathname.startsWith("/auth/")
+                !PUBLIC_ROUTES.some(
+                  (route) =>
+                    pathname === route || pathname.startsWith(`${route}/`),
+                )
               ) {
-                // Token refresh failed and not on authentication pages
+                // Token refresh failed and not on a public page
                 toast.error("Your session has expired. Please log in again.");
                 clearAuthData();
                 router.push("/login");
@@ -145,7 +147,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Check if user has a specific role
   const hasRole = (role: string): boolean => {
     if (!user || !user.roles) return false;
-    return user.roles.includes(role);
+    return user.roles.some((r) => r.toLowerCase() === role.toLowerCase());
+  };
+
+  // Check if user can access a specific path
+  const canAccess = (path: string): boolean => {
+    if (!user || !user.roles) {
+      return PUBLIC_ROUTES.some(
+        (route) => path === route || path.startsWith(`${route}/`),
+      );
+    }
+    return canAccessRoute(path, user.roles);
   };
 
   // Login function - uses direct login with email and password
@@ -217,6 +229,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     refreshUserToken,
     hasRole,
+    canAccess,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
