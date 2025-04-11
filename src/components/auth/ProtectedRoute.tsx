@@ -79,7 +79,6 @@ export default function ProtectedRoute({
   // Second check - show content if authenticated
   // We render the actual content immediately if authenticated to avoid flickering
   if (isAuthenticated) {
-    // Extra check for role-based access
     if (requiredRoles.length > 0) {
       const hasRequiredRole = requiredRoles.some((role) => hasRole(role));
 
