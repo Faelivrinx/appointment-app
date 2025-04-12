@@ -50,7 +50,7 @@ export default function ServiceDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="bg-white sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl">{service.name}</DialogTitle>
           <DialogDescription>Service details and information</DialogDescription>

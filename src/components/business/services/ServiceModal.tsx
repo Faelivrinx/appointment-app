@@ -91,7 +91,7 @@ export default function ServiceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="bg-white sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {service ? "Edit Service" : "Add New Service"}

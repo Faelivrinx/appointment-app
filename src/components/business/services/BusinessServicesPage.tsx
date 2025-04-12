@@ -357,7 +357,7 @@ export default function BusinessServicesPage() {
                         Delete
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="bg-white">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Service</AlertDialogTitle>
                         <AlertDialogDescription>
