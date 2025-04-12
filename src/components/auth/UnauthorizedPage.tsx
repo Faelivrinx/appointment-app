@@ -11,15 +11,6 @@ export default function UnauthorizedPage() {
   const { user, logout, hasRole } = useAuth();
 
   // Determine main redirect based on role
-  const getHomeRoute = () => {
-    if (hasRole("business")) {
-      return "/business";
-    } else if (hasRole("admin")) {
-      return "/admin";
-    } else {
-      return "/dashboard";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-lightest via-white to-shocking-pink-light/10 flex flex-col items-center justify-center p-4">

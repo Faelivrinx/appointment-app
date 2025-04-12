@@ -34,7 +34,7 @@ export async function registerClient(
   clientData: RegisterClientRequest,
 ): Promise<ApiResponse<void>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/clients/register`, {
+    const response = await fetch(`${API_BASE_URL}/identity/clients/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export async function activateClient(
   clientData: ActivateClientRequest,
 ): Promise<ApiResponse<void>> {
   try {
-    const response = await fetch(`${API_BASE_URL}/clients/activate`, {
+    const response = await fetch(`${API_BASE_URL}/identity/clients/activate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

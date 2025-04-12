@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Clock, DollarSign, Edit, Trash2, Plus, Eye } from "lucide-react";
 import { toast } from "sonner";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import ServiceModal from "./ServiceModal";
 import ServiceDetailsModal from "./ServiceDetailsModal";
 import { parseJWT } from "@/services/keycloak";
+import { useRedirect } from "@/hooks/useRedirect";
 
 // Service type definition
 export interface Service {
@@ -43,7 +43,12 @@ export interface Service {
 }
 
 export default function BusinessServicesPage() {
-  const { accessToken, isAuthenticated, hasRole } = useAuth();
+  const { accessChecked, isLoading: redirectLoading } = useRedirect({
+    onlyAuthenticated: true,
+    requiredRoles: ["BUSINESS_OWNER"],
+  });
+
+  const { accessToken, isAuthenticated } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,10 +80,10 @@ export default function BusinessServicesPage() {
 
   // Fetch services when businessId is available
   useEffect(() => {
-    if (businessId && isAuthenticated) {
+    if (businessId && isAuthenticated && accessChecked) {
       fetchServices();
     }
-  }, [businessId, isAuthenticated]);
+  }, [businessId, isAuthenticated, accessChecked]);
 
   // Fetch services from API
   const fetchServices = async () => {
@@ -233,6 +238,16 @@ export default function BusinessServicesPage() {
     }).format(price);
   };
 
+  // Show loading state during redirects or initial data loading
+  if (redirectLoading || !accessChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+        <span className="ml-3">Checking access...</span>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -243,151 +258,149 @@ export default function BusinessServicesPage() {
   }
 
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
-      <div className="min-h-screen bg-gradient-to-br from-neutral-lightest via-white to-shocking-pink-light/10 p-4 sm:p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-100">
-                Services Management
-              </h1>
-              <p className="text-text-200 mt-1">
-                Manage the services your business offers to clients
-              </p>
-            </div>
-            <Button
-              className="mt-4 sm:mt-0 bg-accent-200 hover:bg-accent-100 text-white flex items-center"
-              onClick={handleAddService}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add New Service
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-lightest via-white to-shocking-pink-light/10 p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-100">
+              Services Management
+            </h1>
+            <p className="text-text-200 mt-1">
+              Manage the services your business offers to clients
+            </p>
           </div>
-
-          {error && (
-            <Card className="mb-6 border-red-200 bg-red-50">
-              <CardContent className="pt-6">
-                <p className="text-red-600">{error}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {services.length === 0 && !loading && !error ? (
-            <Card className="text-center p-8">
-              <CardContent>
-                <p className="text-text-200 mb-4">
-                  You haven't added any services yet.
-                </p>
-                <Button
-                  className="bg-accent-200 hover:bg-accent-100 text-white"
-                  onClick={handleAddService}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Service
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service) => (
-                <Card
-                  key={service.id}
-                  className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="h-2 bg-accent-200"></div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">{service.name}</CardTitle>
-                    <CardDescription className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1 text-text-200" />
-                      {service.durationMinutes} minutes
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      <p className="text-text-200 line-clamp-2">
-                        {service.description || "No description provided"}
-                      </p>
-                    </div>
-                    <p className="font-medium flex items-center text-accent-200">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      {formatPrice(service.price)}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 flex items-center justify-center"
-                      onClick={() => handleViewService(service)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 flex items-center justify-center text-amber-600 border-amber-200 hover:bg-amber-50"
-                      onClick={() => handleEditService(service)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 flex items-center justify-center text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Service</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete the service "
-                            {service.name}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                            onClick={() => handleDeleteService(service.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
+          <Button
+            className="mt-4 sm:mt-0 bg-accent-200 hover:bg-accent-100 text-white flex items-center"
+            onClick={handleAddService}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Service
+          </Button>
         </div>
 
-        {/* Service Edit/Create Modal */}
-        <ServiceModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleServiceSave}
-          service={currentService}
-        />
+        {error && (
+          <Card className="mb-6 border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <p className="text-red-600">{error}</p>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Service View Details Modal */}
-        <ServiceDetailsModal
-          isOpen={isViewModalOpen}
-          onClose={() => setIsViewModalOpen(false)}
-          service={currentService}
-          onEdit={() => {
-            setIsViewModalOpen(false);
-            setIsModalOpen(true);
-          }}
-        />
+        {services.length === 0 && !loading && !error ? (
+          <Card className="text-center p-8">
+            <CardContent>
+              <p className="text-text-200 mb-4">
+                You haven't added any services yet.
+              </p>
+              <Button
+                className="bg-accent-200 hover:bg-accent-100 text-white"
+                onClick={handleAddService}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Service
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services.map((service) => (
+              <Card
+                key={service.id}
+                className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="h-2 bg-accent-200"></div>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">{service.name}</CardTitle>
+                  <CardDescription className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1 text-text-200" />
+                    {service.durationMinutes} minutes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <p className="text-text-200 line-clamp-2">
+                      {service.description || "No description provided"}
+                    </p>
+                  </div>
+                  <p className="font-medium flex items-center text-accent-200">
+                    <DollarSign className="h-4 w-4 mr-1" />
+                    {formatPrice(service.price)}
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 flex items-center justify-center"
+                    onClick={() => handleViewService(service)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 flex items-center justify-center text-amber-600 border-amber-200 hover:bg-amber-50"
+                    onClick={() => handleEditService(service)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 flex items-center justify-center text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Service</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete the service "
+                          {service.name}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => handleDeleteService(service.id)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-    </ProtectedRoute>
+
+      {/* Service Edit/Create Modal */}
+      <ServiceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleServiceSave}
+        service={currentService}
+      />
+
+      {/* Service View Details Modal */}
+      <ServiceDetailsModal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        service={currentService}
+        onEdit={() => {
+          setIsViewModalOpen(false);
+          setIsModalOpen(true);
+        }}
+      />
+    </div>
   );
 }
